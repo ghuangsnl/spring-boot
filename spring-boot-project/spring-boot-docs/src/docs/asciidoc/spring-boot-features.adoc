@@ -3145,19 +3145,26 @@ You can learn more about the resource configuration on the client side in the <<
 [[boot-features-graceful-shutdown]]
 == Graceful shutdown
 Graceful shutdown is supported with all four embedded web servers (Jetty, Reactor Netty, Tomcat, and Undertow) and with both reactive and Servlet-based web applications.
-When enabled, shutdown of the application will include a grace period of configurable duration.
-During this grace period, existing requests will be allowed to complete but no new requests will be permitted.
+It occurs as part of closing the application context and is performed in the earliest phase of stopping `SmartLifecycle` beans.
+This stop processing uses a timeout which provides a grace period during which existing requests will be allowed to complete but no new requests will be permitted.
 The exact way in which new requests are not permitted varies depending on the web server that is being used.
 Jetty, Reactor Netty, and Tomcat will stop accepting requests at the network layer.
 Undertow will accept requests but respond immediately with a service unavailable (503) response.
 
-Graceful shutdown occurs as one of the first steps during application close processing and before any beans have been destroyed.
-This ensures that the beans are available for use by any processing that occurs while in-flight requests are being allowed to complete.
-To enable graceful shutdown, configure the configprop:server.shutdown.grace-period[] property, as shown in the following example:
+NOTE: Graceful shutdown with Tomcat requires Tomcat 9.0.33 or later.
+
+To enable graceful shutdown, configure the configprop:server.shutdown[] property, as shown in the following example:
 
 [source,properties,indent=0,configprops]
 ----
-server.shutdown.grace-period=30s
+server.shutdown=graceful
+----
+
+To configure the timeout period, configure the configprop:spring.lifecycle.timeout-per-shutdown-phase[] property, as shown in the following example:
+
+[source,properties,indent=0,configprops]
+----
+spring.lifecycle.timeout-per-shutdown-phase=20s
 ----
 
 
@@ -3369,6 +3376,7 @@ You can register multiple OAuth2 clients and providers under the `spring.securit
 	spring.security.oauth2.client.provider.my-oauth-provider.user-info-authentication-method=header
 	spring.security.oauth2.client.provider.my-oauth-provider.jwk-set-uri=https://my-auth-server/token_keys
 	spring.security.oauth2.client.provider.my-oauth-provider.user-name-attribute=name
+	spring.security.oauth2.client.provider.my-oauth-provider.configuration-metadata.end_session_endpoint=https://my-end-session-endpoint
 ----
 
 For OpenID Connect providers that support https://openid.net/specs/openid-connect-discovery-1_0.html[OpenID Connect discovery], the configuration can be further simplified.

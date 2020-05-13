@@ -14,23 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.boot.web.server;
-
 /**
- * A {@link GracefulShutdown} that returns immediately with no grace period.
- *
- * @author Andy Wilkinson
+ * Spring Web error handling infrastructure.
  */
-class ImmediateGracefulShutdown implements GracefulShutdown {
-
-	@Override
-	public boolean shutDownGracefully() {
-		return false;
-	}
-
-	@Override
-	public boolean isShuttingDown() {
-		return false;
-	}
-
-}
+package org.springframework.boot.web.error;
